@@ -13,7 +13,7 @@ import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CustomConnectionProvider implements CachedConnectionProvider<CustomConnection> {
+public class CustomConnectionProvider implements ConnectionProvider<CustomConnection> {
 	@ParameterGroup(name="Connection")
 	CustomConfiguration customConfig;
 	private static final Logger LOGGER = LoggerFactory.getLogger(CustomConnectionProvider.class);
