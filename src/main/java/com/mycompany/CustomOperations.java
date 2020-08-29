@@ -8,13 +8,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import org.mule.runtime.extension.api.annotation.Alias;
-import org.mule.runtime.extension.api.annotation.param.Config;
+import org.mule.runtime.extension.api.annotation.param.Connection;
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.ParameterGroup;
 import org.slf4j.Logger;
@@ -29,18 +28,12 @@ public class CustomOperations {
 	
 	@MediaType(value = ANY, strict =false)
 	@Alias("GET")
-	public String getCall(@Config CustomConfiguration c) {
-		LOGGER.info("Sending a get request....");
+	public String getCall(@Connection CustomConnection c) {
 		String response = null;
-		String protocol = c.getProtocol().equals("HTTPS") ? "https://" : "http://";
 		try {
-			URL url = new URL(protocol + c.getHost() + c.getBasepath());
-			URLConnection con = url.openConnection();
-			con.addRequestProperty("User-Agent", "Mozilla");
-			response = getHttpResponse(con);
+			LOGGER.info("Sending a get request....");
+			response = getHttpResponse(c.getConnection());
 			LOGGER.info("Response received.");
-			
-			
 		}
 		catch(Exception e) {
 			LOGGER.error("Error occured");
@@ -51,19 +44,16 @@ public class CustomOperations {
 	
 	@MediaType(value = ANY, strict =false)
 	@Alias("POST")
-	public String postCall(@Config CustomConfiguration c, @ParameterGroup(name= "customparams") CustomParameters p) {
+	public String postCall(@Connection CustomConnection c, @ParameterGroup(name= "customparams") CustomParameters p) {
 		
 		String response = null;
-		String protocol = c.getProtocol().equals("HTTPS") ? "https://" : "http://";
+		
 
-		try {
-					URL url = new URL(protocol + c.getHost() + c.getBasepath());
-					URLConnection con = url.openConnection();
+		try {					
+					URLConnection con = c.getConnection();
 					String jsonString = "{\"name\": \""+p.getFirstName()+"\", \"job\":\""+p.getJob()+"\"}";
 					con.setDoOutput(true);
-					con.addRequestProperty("User-Agent", "Mozilla");
-
-					if(c.getProtocol().equals("HTTPS")){
+					if(con instanceof HttpsURLConnection){
 						LOGGER.info("Processing HTTPS request");
 						HttpsURLConnection https = (HttpsURLConnection) con;
 						https.setRequestMethod("POST");
